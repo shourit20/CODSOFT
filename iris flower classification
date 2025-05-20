@@ -1,0 +1,48 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+
+st.title("🌼 Iris Flower Classification App")
+
+
+@st.cache_data
+def load_data():
+    df = pd.read_csv(r"C:\Users\HP\Downloads\IRIS.csv")
+    return df
+
+df = load_data()
+
+# Show dataset
+if st.checkbox("Show Dataset"):
+    st.dataframe(df)
+
+
+X = df.drop("species", axis=1)
+y = df["species"]
+
+# Scale and train
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_scaled, y)
+
+# Sidebar inputs
+st.sidebar.header("Enter Flower Measurements")
+sepal_length = st.sidebar.slider("Sepal Length (cm)", float(X['sepal_length'].min()), float(X['sepal_length'].max()), float(X['sepal_length'].mean()))
+sepal_width = st.sidebar.slider("Sepal Width (cm)", float(X['sepal_width'].min()), float(X['sepal_width'].max()), float(X['sepal_width'].mean()))
+petal_length = st.sidebar.slider("Petal Length (cm)", float(X['petal_length'].min()), float(X['petal_length'].max()), float(X['petal_length'].mean()))
+petal_width = st.sidebar.slider("Petal Width (cm)", float(X['petal_width'].min()), float(X['petal_width'].max()), float(X['petal_width'].mean()))
+
+
+input_data = np.array([[sepal_length, sepal_width, petal_length, petal_width]])
+input_scaled = scaler.transform(input_data)
+prediction = model.predict(input_scaled)[0]
+
+
+st.subheader("Predicted Species:")
+st.success(f"The Iris flower species is likely **{prediction.capitalize()}**.")
